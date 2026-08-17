@@ -708,7 +708,7 @@ const css = `
   box-shadow: 0 0 34px 10px rgba(128,170,211,0.4);
   transition: top 0.05s linear, left 0.05s linear;
 }
-.wy-shell { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; }
+.wy-shell { position: relative; z-index: 2; width: 100%; max-width: 1600px; margin: 0 auto; }
 .wy-glass {
   background: linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
   backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%);
