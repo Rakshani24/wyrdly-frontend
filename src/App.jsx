@@ -132,11 +132,35 @@ export default function App() {
   const [targetCircuit, setTargetCircuit] = useState(null);
   const [loadingExplanation, setLoadingExplanation] = useState(false)
   const stageRef = useRef(null);
+  const stageWrapperRef = useRef(null);
+  const [stageScale, setStageScale] = useState(1);
+
+  const BASE_STAGE_WIDTH = 700;
+  const BASE_STAGE_HEIGHT = 410;
 
   useEffect(() => {
     const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY })
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (!stageWrapperRef.current) return
+      const availableWidth = stageWrapperRef.current.offsetWidth
+      if (!availableWidth) return
+      const rawScale = availableWidth / BASE_STAGE_WIDTH
+      const clamped = Math.min(Math.max(rawScale, 0.4), 1.5)
+      setStageScale(clamped)
+    }
+    updateScale()
+    const observer = new ResizeObserver(updateScale)
+    if (stageWrapperRef.current) observer.observe(stageWrapperRef.current)
+    window.addEventListener('resize', updateScale)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateScale)
+    }
   }, [])
 
   const getHoleColor = (hole) => {
@@ -466,25 +490,6 @@ if (comp.type === 'transistor') {
 
   return (
     <div className="wy-root" style={{ '--mx': `${mousePos.x}px`, '--my': `${mousePos.y}px` }}>
-      <div className="wy-menu-wrap">
-  <button className="wy-btn wy-btn-ghost wy-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
-    ☰
-  </button>
-  {menuOpen && (
-    <div className="wy-menu-dropdown wy-glass">
-      <label className="wy-menu-item">
-        📷 Import Schematic
-        <input type="file" accept="image/*" onChange={handleSchematicUpload} style={{ display: 'none' }} />
-      </label>
-      <button className="wy-menu-item" onClick={handleExportCircuit} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none' }}>
-    💾 Export Circuit
-  </button>
-  <button className="wy-menu-item" onClick={handleExportPNG} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none' }}>
-     Export as PNG
-  </button>
-    </div>
-  )}
-</div>
       <style>{css}</style>
 
       <div className="wy-spotlight" aria-hidden="true" />
@@ -505,6 +510,25 @@ if (comp.type === 'transistor') {
           </div>
 
           <div className="wy-header-right">
+            <div className="wy-menu-wrap">
+              <button className="wy-btn wy-btn-ghost wy-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+                ☰
+              </button>
+              {menuOpen && (
+                <div className="wy-menu-dropdown wy-glass">
+                  <label className="wy-menu-item">
+                    📷 Import Schematic
+                    <input type="file" accept="image/*" onChange={handleSchematicUpload} style={{ display: 'none' }} />
+                  </label>
+                  <button className="wy-menu-item" onClick={handleExportCircuit} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none' }}>
+                    💾 Export Circuit
+                  </button>
+                  <button className="wy-menu-item" onClick={handleExportPNG} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none' }}>
+                     Export as PNG
+                  </button>
+                </div>
+              )}
+            </div>
             <label className="wy-field">
               <span className="wy-field-label">REFERENCE</span>
               <select className="wy-select" value={referenceCircuit} onChange={(e) => setReferenceCircuit(e.target.value)}>
@@ -563,8 +587,14 @@ if (comp.type === 'transistor') {
                 <span className="wy-corner tr" />
                 <span className="wy-corner bl" />
                 <span className="wy-corner br" />
-                <div className="wy-stage-scroll">
-                  <Stage width={700} height={410} ref={stageRef}>
+                <div className="wy-stage-scroll" ref={stageWrapperRef}>
+                  <Stage
+                    width={BASE_STAGE_WIDTH * stageScale}
+                    height={BASE_STAGE_HEIGHT * stageScale}
+                    scaleX={stageScale}
+                    scaleY={stageScale}
+                    ref={stageRef}
+                  >
                     <Layer>
                       <Rect x={20} y={10} width={660} height={390} fill={theme.board} cornerRadius={6} />
                       {holes.map((hole) => (
@@ -721,7 +751,7 @@ html, body, #root {
   box-shadow: 0 10px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.25);
 }
 .wy-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 16px 22px; margin-bottom: 20px; }
-.wy-menu-wrap { position: fixed; top: 24px; right: 24px; z-index: 50; }
+.wy-menu-wrap { position: relative; z-index: 50; }
 .wy-menu-btn { padding: 10px 13px; font-size: 16px; }
 .wy-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 190px; padding: 8px; z-index: 50; }
 .wy-menu-item { display: block; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: ${theme.silk}; padding: 9px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease; }
@@ -763,7 +793,7 @@ html, body, #root {
 .wy-screen { padding: 16px; }
 .wy-screen-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; color: ${theme.silkDim}; padding: 0 4px 12px; flex-wrap: wrap; }
 .wy-screen-frame { position: relative; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 10px; background: rgba(10,4,8,0.55); overflow: hidden; box-shadow: inset 0 2px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08); }
-.wy-stage-scroll { overflow-x: auto; border-radius: 8px; }
+.wy-stage-scroll { display: flex; justify-content: center; align-items: center; width: 100%; border-radius: 8px; }
 .wy-corner { position: absolute; width: 12px; height: 12px; border: 1.5px solid rgba(192,230,253,0.8); opacity: 0.8; }
 .wy-corner.tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
 .wy-corner.tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
@@ -815,6 +845,7 @@ html, body, #root {
   .wy-body { gap: 14px; }
   .wy-rail, .wy-screen, .wy-console { padding: 14px; }
   .wy-tools { grid-template-columns: 1fr; }
-  .wy-menu-wrap { top: 14px; right: 14px; }
+  .wy-header-right { justify-content: center; }
+  .wy-menu-wrap { align-self: center; }
 }
 `
