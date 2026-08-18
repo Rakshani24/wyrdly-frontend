@@ -150,7 +150,7 @@ export default function App() {
       const availableWidth = stageWrapperRef.current.offsetWidth
       if (!availableWidth) return
       const rawScale = availableWidth / BASE_STAGE_WIDTH
-      const clamped = Math.min(Math.max(rawScale, 0.4), 1.5)
+      const clamped = Math.min(Math.max(rawScale, 0.4), 1)
       setStageScale(clamped)
     }
     updateScale()
