@@ -750,7 +750,7 @@ html, body, #root {
   border: 1px solid rgba(255,255,255,0.12); border-radius: w20px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.25);
 }
-.wy-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 16px 22px; margin-bottom: 20px; }
+.wy-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 16px 22px; margin-bottom: 20px; position: relative; z-index: 10; }
 .wy-menu-wrap { position: relative; z-index: 50; }
 .wy-menu-btn { padding: 10px 13px; font-size: 16px; }
 .wy-menu-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 190px; padding: 8px; z-index: 50; }
