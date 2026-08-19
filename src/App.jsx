@@ -315,7 +315,7 @@ const handleExportPNG = () => {
         value: c.value,
       })),
       reference_circuit_name: referenceCircuit === '_imported' ? null : referenceCircuit,
-  custom_reference: referenceCircuit === '_imported' ? targetCircuit : null,
+      custom_reference: referenceCircuit === '_imported' ? targetCircuit : null,
     }
 
     try {
